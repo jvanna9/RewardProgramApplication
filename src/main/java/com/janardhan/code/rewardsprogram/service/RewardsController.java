@@ -20,14 +20,17 @@ public class RewardsController {
     @Autowired
     private RewardPointService rewardPointService;
 
+    @Autowired
+    private RewardService rewardService;
+
     @GetMapping("/customers")
     public List<Customer> findCustomerAll() {
-        return rewardPointService.getCustomerAll();
+        return rewardService.getCustomerAll();
     }
 
     @GetMapping("/customers/{id}/{month}")
     public ResponseEntity<CustomerPointsResponse> getCustomer(@PathVariable Integer id, @PathVariable String month) {
-        Customer customer = rewardPointService.getCustomerById(id);
+        Customer customer = rewardService.getCustomerById(id);
         if (customer == null) return new ResponseEntity<CustomerPointsResponse>(HttpStatus.NOT_FOUND);
         Set<CustomerTransaction> transactions = customer.getTransactions();
         Double total = 0.0;
@@ -38,19 +41,16 @@ public class RewardsController {
             String mon = new SimpleDateFormat("MMM").format(ct.getSaveDate());
 
             if(mon.equals(month)) {
-
+                System.out.println(mon);
                 total += ct.getTotal();
                 counter++;
-            }
-            else
-            {
-                return new ResponseEntity<CustomerPointsResponse>(new CustomerPointsResponse(null,null,null,0), HttpStatus.NO_CONTENT);
             }
 
         }
 
         rewardPoints =  rewardPointService.getRewardPointsFromTotal(total);
+
         return new ResponseEntity<CustomerPointsResponse>(new CustomerPointsResponse(customer,rewardPoints,total,counter), HttpStatus.OK);
 
-}
+    }
 }
